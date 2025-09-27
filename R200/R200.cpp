@@ -4,9 +4,9 @@
 // Constructor
 R200::R200() {};
 
-bool R200::begin(HardwareSerial *serial, int baud, uint8_t RxPin, uint8_t TxPin){
+bool R200::begin(HardwareSerial *serial, int baud) {
   _serial = serial;
-  _serial->begin(baud, SERIAL_8N1, RxPin, TxPin);
+  _serial->begin(baud);
   return true;
 };
 

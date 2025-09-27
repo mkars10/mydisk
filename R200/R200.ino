@@ -17,7 +17,7 @@ void setup() {
   Serial.begin(115200);
   Serial.println(__FILE__ __DATE__);
 
-  rfid.begin(&Serial2, 115200, 16, 17);
+  rfid.begin(&Serial, 115200);
 
   // Get info
   rfid.dumpModuleInfo();

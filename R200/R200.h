@@ -29,7 +29,7 @@ class R200 {
 
     uint8_t uid[12] = {0};
 
-    bool begin(HardwareSerial *serial = &Serial2, int baud = 115200, uint8_t RxPin = 16, uint8_t TxPin = 17);
+    bool begin(HardwareSerial *serial = &Serial, int baud = 115200);
     void loop();
     void poll();
     void setMultiplePollingMode(bool enable=true);

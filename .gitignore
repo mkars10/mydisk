@@ -1,0 +1,8 @@
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+
+# Vendor instructional videos (~312MB; one is 145MB, over GitHub's 100MB
+# per-file hard limit). They stay on local disk - not needed to build.
+From vendor/**/*.mp4

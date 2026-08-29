@@ -1,0 +1,12 @@
+Feedback from customer：
+
+We do have an Arduino Mega running our program very reliably.
+We have codes for ReadSingle, ReadMulti, StopRead, Set Serial and Write.
+The also includes an EPC check function. So, after writing we found most chips didn’t get written jet but in two tries, they would.
+So right now, it writes, checks if the EPC is what we wanted and then stop or write again depending on if the EPC is correct.
+
+Our biggest issue was implementing the correct CRC and Checksum in the write command. Since the CRC code is different between most chips it has to alter the write command to the specific tag you want to write to.
+After figuring this out and receiving help from our main programmer we made it work.
+
+I will add the working Arduino code in this mail as well as a picture of our set-up. It’s important to use an Arduino Mega (it might work with an Arduino Uno) since we use multiple and different serial ports.
+Using the main serial port had some issues with uploading the code etc.

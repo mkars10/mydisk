@@ -99,7 +99,41 @@ dev boards. To see what's actually connected:
 .venv/bin/python -m serial.tools.list_ports -v
 ```
 
-## 4. How the "hotter/colder" metric works
+## 4. Field mode — phone over WiFi
+
+The same firmware also hosts its own WiFi access point, so you can walk the
+park with a battery pack and your phone. No app, no internet, no cell signal.
+
+1. Power the ESP32 from any 5V USB battery pack.
+2. On your phone, join the WiFi network **`DiscTracker`**, password **`discgolf`**.
+3. Open **http://192.168.4.1** (or **http://disc.local**).
+
+The page updates in place — nothing scrolls, nothing accumulates:
+
+- **Focus card** at the top: one tag, big proximity number, bar, RSSI,
+  reads/sec, total reads. By default it follows the strongest tag; tap any tag
+  in the list to lock onto it, tap again to unlock. A locked tag that goes out
+  of range shows `—` and turns red rather than silently reading stale numbers.
+- **START / STOP** — the same idle-safe control as the terminal.
+- **Signal strength slider**, 5–26 dBm, live.
+- **CLICKS** toggle — Geiger clicks from the phone's speaker via Web Audio.
+  Browsers block audio until the user taps something, which is why it's a
+  button rather than automatic.
+- **Tag list**, sorted strongest-first, with a mini bar and RSSI each.
+
+The tracking maths (RSSI smoothing, read rate, proximity) now runs on the
+ESP32, so the phone is a thin display and the laptop is optional. Serial
+output is unchanged — `tracker.py` still works over USB exactly as before.
+
+### Battery notes
+
+Running the WiFi AP adds roughly 100–150 mA on top of the reader, so budget
+around 0.5 A peak at high transmit power. Any modest power bank will run this
+for hours. Watch for banks that auto-shut-off under light load — the reader
+usually draws enough to keep them awake, but it's the most likely field
+annoyance.
+
+## 5. How the "hotter/colder" metric works
 
 Two signals are blended, because each is only good in part of the range:
 

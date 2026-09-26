@@ -5,23 +5,43 @@
 //  Created by Michael Karsten on 9/28/25.
 //
 
+import Observation
 import SwiftUI
 
 struct ContentView: View {
     @State private var isRunning = false
-    @State private var signalStrength = 50.0
+    @State private var signalStrengthModel = SignalStrengthModel()
+    @State private var disks: [Disk] = []
+    @State private var selectedDisk = ""
+
+    private let signalStrengthSource: any SignalStrengthSource = MockSignalStrengthSource()
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
-                Text("Welcome to MyDisk!")
+                Text("Disk Finder")
                     .font(.title.bold())
+
+                Picker("Disk", selection: $selectedDisk) {
+                    ForEach(disks) { disk in
+                            Text(disk.name)
+                                .tag(disk.name) // The tag must match the data type of $selectedDisk
+                        }
+                }
+                .pickerStyle(.menu)
+
+                NavigationLink {
+                    StashView()
+                } label: {
+                    Text("Manage Stash")
+                }
+                .buttonStyle(.bordered)
 
                 Spacer()
 
-                SignalStrengthBar(value: signalStrength)
+                SignalStrengthBar(value: signalStrengthModel.value)
 
-                Button(isRunning ? "Stop" : "Start") {
+                Button(isRunning ? "Stop Scanning" : "Start Scanning") {
                     isRunning.toggle()
                 }
                 .frame(maxWidth: .infinity)
@@ -31,6 +51,89 @@ struct ContentView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 12))
             }
             .padding()
+            .onAppear {
+                disks = DiskStore.load()
+                if let firstDisk = disks.first {
+                    selectedDisk = firstDisk.name
+                }
+            }
+        }
+        .task(id: isRunning) {
+            guard isRunning else {
+                signalStrengthModel.reset()
+                return
+            }
+
+            await signalStrengthSource.start(updating: signalStrengthModel)
+        }
+    }
+}
+
+@MainActor
+@Observable
+final class SignalStrengthModel {
+    var value = 0.0
+
+    func reset() {
+        value = 0
+    }
+
+    func record(_ newValue: Double) {
+        value = min(max(newValue, 0), 100)
+        PingPlayer.shared.play()
+    }
+}
+
+@MainActor
+protocol SignalStrengthSource {
+    func start(updating model: SignalStrengthModel) async
+}
+
+@MainActor
+struct MockSignalStrengthSource: SignalStrengthSource {
+    func start(updating model: SignalStrengthModel) async {
+        while !Task.isCancelled {
+            do {
+                try await Task.sleep(for: .milliseconds(500))
+            } catch {
+                return
+            }
+
+            // Replace this source with the Bluetooth reader when it is available.
+            model.record(Double.random(in: 0...100))
+        }
+    }
+}
+
+struct StashView: View {
+    @State private var disks: [Disk] = []
+
+    var body: some View {
+        ScrollView {
+            Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 12) {
+                GridRow {
+                    Text("Name")
+                    Text("Type")
+                    Text("Flight Numbers")
+                }
+                .font(.headline)
+
+                Divider()
+
+                ForEach(disks) { disk in
+                    GridRow {
+                        Text(disk.name)
+                        Text(disk.type)
+                                                Text(disk.flightNumbers.map(String.init).joined(separator: ", "))
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding()
+        }
+        .navigationTitle("Stash")
+        .onAppear {
+            disks = DiskStore.load()
         }
     }
 }
@@ -66,6 +169,7 @@ struct SignalStrengthBar: View {
                     }
             }
             .frame(height: 44)
+            .animation(.linear(duration: 0.05), value: clampedValue)
 
             HStack {
                 Text("0")

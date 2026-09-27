@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<!-- Merged into the generated Info.plist. AccessorySetupKit (MyDisk/Finder/FinderSetup.swift):
+     the picker may only look for the MyDisk finder's Bluetooth service. -->
+<dict>
+	<key>NSAccessorySetupKitSupports</key>
+	<array>
+		<string>Bluetooth</string>
+	</array>
+	<key>NSAccessorySetupBluetoothServices</key>
+	<array>
+		<string>576097DE-0001-4B1F-9097-0D8EE45A7F07</string>
+	</array>
+</dict>
+</plist>

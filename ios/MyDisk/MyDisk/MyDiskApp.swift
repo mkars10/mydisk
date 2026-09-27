@@ -11,7 +11,12 @@ import SwiftUI
 struct MyDiskApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            TabView {
+                ContentView()
+                    .tabItem { Label("Finder", systemImage: "dot.radiowaves.left.and.right") }
+                FinderStatsView()   // MyDiskKit test page (Finder/)
+                    .tabItem { Label("Finder Stats", systemImage: "list.bullet.rectangle") }
+            }
         }
     }
 }

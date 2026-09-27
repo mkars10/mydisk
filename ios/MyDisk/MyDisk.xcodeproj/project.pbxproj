@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		3DF1A0012E9A000000C0FFEE /* MyDiskKit in Frameworks */ = {isa = PBXBuildFile; productRef = 3DF1A0022E9A000000C0FFEE /* MyDiskKit */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		3DD343912E89D8EE00CFFD8A /* MyDisk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MyDisk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +27,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3DF1A0012E9A000000C0FFEE /* MyDiskKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +70,7 @@
 			);
 			name = MyDisk;
 			packageProductDependencies = (
+				3DF1A0022E9A000000C0FFEE /* MyDiskKit */,
 			);
 			productName = MyDisk;
 			productReference = 3DD343912E89D8EE00CFFD8A /* MyDisk.app */;
@@ -94,6 +100,9 @@
 			);
 			mainGroup = 3DD343882E89D8EE00CFFD8A;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				3DF1A0032E9A000000C0FFEE /* XCLocalSwiftPackageReference "../MyDiskKit" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 3DD343922E89D8EE00CFFD8A /* Products */;
 			projectDirPath = "";
@@ -255,6 +264,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "MyDisk-Info.plist";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "MyDisk uses Bluetooth to connect to your disc finder.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -286,6 +297,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "MyDisk-Info.plist";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "MyDisk uses Bluetooth to connect to your disc finder.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -330,6 +343,20 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		3DF1A0032E9A000000C0FFEE /* XCLocalSwiftPackageReference "../MyDiskKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../MyDiskKit;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		3DF1A0022E9A000000C0FFEE /* MyDiskKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MyDiskKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 3DD343892E89D8EE00CFFD8A /* Project object */;
 }

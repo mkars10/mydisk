@@ -9,6 +9,7 @@ struct Disk: Codable, Identifiable {
     var glide: Int
     var turn: Int
     var fade: Int
+    var epc: String? // RFID tag ID (MyDiskKit); nil until a tag is linked
 }
 
 // 2. Wrap your persistence functions in a clean, reusable helper
@@ -18,9 +19,12 @@ struct DiskStore {
         .appendingPathComponent("disks.json")
     
     static let mockData: [Disk] = [
-        Disk(name: "The Beast", type: "Distance Driver", speed: 7, glide: 2, turn: 0, fade: 1),
-        Disk(name: "Leapord", type: "Midrange", speed: 4, glide: 3, turn: 0, fade: 1),
-        Disk(name: "Kitten", type: "Putter", speed: 2, glide: 0, turn: 0, fade: 0)
+        Disk(name: "The Beast", type: "Distance Driver", speed: 7, glide: 2, turn: 0, fade: 1,
+             epc: "E280691500005017AAE65055"),
+        Disk(name: "Leapord", type: "Midrange", speed: 4, glide: 3, turn: 0, fade: 1,
+             epc: "E28068900000500E88C6B112"),
+        Disk(name: "Kitten", type: "Putter", speed: 2, glide: 0, turn: 0, fade: 0,
+             epc: "E28068900000500E88C6C3F0")
     ]
 
     static func save(_ disks: [Disk]) {

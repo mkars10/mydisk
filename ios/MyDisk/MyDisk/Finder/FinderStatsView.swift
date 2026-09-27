@@ -1,3 +1,4 @@
+import AccessorySetupKit
 import SwiftUI
 import MyDiskKit
 
@@ -18,6 +19,7 @@ extension DiscFinder {
 
 struct FinderStatsView: View {
     @State private var finder = DiscFinder.shared
+    private let setup = FinderSetup.shared
     @State private var power = 20
     @State private var updateCount = 0
     @State private var disks: [Disk] = []
@@ -25,6 +27,20 @@ struct FinderStatsView: View {
     var body: some View {
         NavigationStack {
             List {
+                Section("AccessorySetupKit") {
+                    LabeledContent("accessory", value: setup.accessory?.displayName ?? "none")
+                    if let id = setup.accessory?.bluetoothIdentifier {
+                        Text(id.uuidString).font(.caption.monospaced()).textSelection(.enabled)
+                    }
+                    LabeledContent("last event", value: setup.lastEvent)
+                    HStack {
+                        Button("Set up finder…") { setup.showPicker() }
+                        Button("Remove finder") { setup.removeFinder() }
+                            .disabled(setup.accessory == nil)
+                    }
+                    .buttonStyle(.bordered)
+                }
+
                 Section("Connection") {
                     LabeledContent("connectionState", value: String(describing: finder.connectionState))
                     HStack {

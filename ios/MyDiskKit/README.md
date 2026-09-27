@@ -144,7 +144,7 @@ accessory picker and connect to the one the user chose. The finder already
 advertises the service UUID the picker needs.
 
 1. Info.plist:
-   - `NSAccessorySetupSupports`: array with `Bluetooth`
+   - `NSAccessorySetupKitSupports`: array with `Bluetooth`
    - `NSAccessorySetupBluetoothServices`: array with
      `576097DE-0001-4B1F-9097-0D8EE45A7F07`
 2. Show the picker, then hand the chosen finder to `DiscFinder`:

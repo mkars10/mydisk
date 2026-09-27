@@ -15,27 +15,29 @@ final class BluetoothTransport: NSObject, FinderTransport {
 
     var onEvent: ((TransportEvent) -> Void)?
 
-    private var central: CBCentralManager!
+    /// Created on connect and released on disconnect: AccessorySetupKit won't show its
+    /// picker while an app with global Bluetooth permission has a manager alive.
+    private var central: CBCentralManager?
     private var peripheral: CBPeripheral?
     private var commandCharacteristic: CBCharacteristic?
     /// True between connect() and disconnect(): keep trying and reconnect after drops.
     private var wantsConnection = false
 
-    override init() {
-        super.init()
-        central = CBCentralManager(delegate: self, queue: nil)   // callbacks on the main queue
-    }
-
     // MARK: - FinderTransport
 
     func connect() {
         wantsConnection = true
+        if central == nil {
+            // Callbacks on the main queue; centralManagerDidUpdateState starts connecting.
+            central = CBCentralManager(delegate: self, queue: nil)
+            return
+        }
         startConnecting()
     }
 
     func connect(to id: UUID) {
         if let peripheral, peripheral.identifier != id {
-            central.cancelPeripheralConnection(peripheral)   // switching finders
+            central?.cancelPeripheralConnection(peripheral)   // switching finders
             self.peripheral = nil
             commandCharacteristic = nil
         }
@@ -45,8 +47,9 @@ final class BluetoothTransport: NSObject, FinderTransport {
 
     func disconnect() {
         wantsConnection = false
-        central.stopScan()
-        if let peripheral { central.cancelPeripheralConnection(peripheral) }
+        central?.stopScan()
+        if let peripheral { central?.cancelPeripheralConnection(peripheral) }
+        central = nil
         peripheral = nil
         commandCharacteristic = nil
         onEvent?(.connection(.disconnected))
@@ -69,7 +72,7 @@ final class BluetoothTransport: NSObject, FinderTransport {
     }
 
     private func startConnecting() {
-        guard wantsConnection else { return }
+        guard wantsConnection, let central else { return }
         guard central.state == .poweredOn else {
             // .unknown and .resetting settle by themselves; centralManagerDidUpdateState calls back.
             if central.state != .unknown && central.state != .resetting {
@@ -105,7 +108,7 @@ final class BluetoothTransport: NSObject, FinderTransport {
         commandCharacteristic = nil
         if wantsConnection, let peripheral {
             onEvent?(.connection(.searching))
-            central.connect(peripheral)   // reconnects by itself when back in range
+            central?.connect(peripheral)   // reconnects by itself when back in range
         } else {
             onEvent?(.connection(.disconnected))
         }
@@ -125,6 +128,7 @@ final class BluetoothTransport: NSObject, FinderTransport {
 extension BluetoothTransport: CBCentralManagerDelegate {
     nonisolated func centralManagerDidUpdateState(_ central: CBCentralManager) {
         MainActor.assumeIsolated {
+            guard central === self.central else { return }   // a manager released by disconnect()
             if central.state == .poweredOn {
                 startConnecting()
             } else if central.state != .unknown && central.state != .resetting {

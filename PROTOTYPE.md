@@ -1,9 +1,9 @@
 # Disc Tracker Prototype
 
 Goal: find a disc (with a passive UHF RFID sticker on it) using the R200 reader
-and an ESP32. No app required — a terminal display on a laptop over USB, or a
-phone page served by the ESP32's own WiFi for field use. Both give Geiger-counter
-clicks that speed up as you get closer.
+and an ESP32. A terminal display on a laptop over USB, or the MyDisk iPhone app
+over Bluetooth for field use. Both give Geiger-counter clicks that speed up as
+you get closer.
 
 ## 1. Hardware
 
@@ -88,7 +88,7 @@ numbers — not measured):
 
 | State | Average @ 5 V | Peak |
 |---|---|---|
-| Idle, AP up, not scanning | ~160 mA | ~280 mA |
+| Idle, Bluetooth advertising, not scanning | ~100 mA (estimate) | ~280 mA |
 | Scanning @ 12 dBm | ~250 mA | ~400 mA |
 | Scanning @ 20 dBm (default) | ~330 mA | ~500 mA |
 | Scanning @ 26 dBm | ~525 mA | ~700 mA |
@@ -111,7 +111,9 @@ A 10,000 mAh bank delivers roughly 6,600 mAh at 5 V after losses, so expect
 Use the Espressif `esp32` core, **not** the Arduino-branded `arduino/esp32`
 package — that one is for the Nano ESP32 and won't offer the right board.
 
-Current build size: 73% of program storage, 16% of dynamic memory.
+Build size was 73% of program storage with WiFi. WiFi is gone and Bluetooth is
+in, so re-check it on the first compile. If it doesn't fit, pick
+**Tools › Partition Scheme › Huge APP**.
 
 ### Still to record
 
@@ -121,7 +123,7 @@ Current build size: 73% of program storage, 16% of dynamic memory.
 - [ ] Battery pack model and capacity
 - [ ] Measured current draw (a $10 inline USB power meter settles it)
 - [ ] Measured RSSI at edge of range and at the antenna, for tuning
-      `RSSI_FLOOR` / `RSSI_CEIL` in `firmware/DiscTracker/tagtable.h`
+      `RSSI_FLOOR` / `RSSI_CEIL` in `firmware/DiscTracker/tracker.h`
 
 ## 2. Wiring
 
@@ -218,39 +220,41 @@ dev boards. To see what's actually connected:
 .venv/bin/python -m serial.tools.list_ports -v
 ```
 
-## 5. Field mode — phone over WiFi
+## 5. Field mode — phone over Bluetooth
 
-The same firmware also hosts its own WiFi access point, so you can walk the
-park with a battery pack and your phone. No app, no internet, no cell signal.
+The firmware advertises over Bluetooth LE as **`MyDisk`** whenever no phone is
+connected. The iPhone app talks to it through the `MyDiskKit` Swift package in
+`ios/MyDiskKit` (see its README). The protocol is in
+[docs/ble-interface.md](docs/ble-interface.md).
 
-1. Power the ESP32 from any 5V USB battery pack.
-2. On your phone, join the WiFi network **`DiscTracker`**, password **`discgolf`**.
-3. Open **http://192.168.4.1** (or **http://disc.local**).
+USB serial still works at the same time, so `tracker.py` is unchanged and the
+serial monitor shows `INFO,phone disconnected` and friends.
 
-The page updates in place — nothing scrolls, nothing accumulates:
+### Test the Bluetooth link without the app
 
-- **Focus card** at the top: one tag, big proximity number, bar, RSSI,
-  reads/sec, total reads. By default it follows the strongest tag; tap any tag
-  in the list to lock onto it, tap again to unlock. A locked tag that goes out
-  of range shows `—` and turns red rather than silently reading stale numbers.
-- **START / STOP** — the same idle-safe control as the terminal.
-- **Signal strength slider**, 5–26 dBm, live.
-- **CLICKS** toggle — Geiger clicks from the phone's speaker via Web Audio.
-  Browsers block audio until the user taps something, which is why it's a
-  button rather than automatic.
-- **Tag list**, sorted strongest-first, with a mini bar and RSSI each.
+Use **nRF Connect** (free, Nordic Semiconductor, iOS/Android):
 
-The tracking maths (RSSI smoothing, read rate, proximity) now runs on the
-ESP32, so the phone is a thin display and the laptop is optional. Serial
-output is unchanged — `tracker.py` still works over USB exactly as before.
+1. Flash the firmware, attach the antenna, power it. The serial monitor should
+   say `INFO,bluetooth advertising as MyDisk`.
+2. In nRF Connect, scan, find **MyDisk**, tap **Connect**.
+3. Open the service starting `576097DE-0001`. You should see three
+   characteristics: `...0002` (write), `...0003` (notify), `...0004` (read, notify).
+4. Read `...0004` (status): expect `01-00-14` (version 1, idle, 20 dBm).
+5. Tap the subscribe arrows on `...0003` and `...0004`.
+6. Write to `...0002` as **Text/UTF-8**: `P15`. Status notifies `01-00-0F`.
+7. Write `S`. Status notifies `01-01-0F`. Hold a tag near the antenna:
+   `...0003` notifies about 5 times a second, e.g.
+   `CE-3D-0B-0C-E2-80-...` (RSSI −50, proximity 61, 11 reads/s, 12-byte EPC).
+8. Take the tag away: proximity counts down to `00` within ~2 s, then updates stop.
+9. Disconnect in nRF Connect. The finder stops scanning on its own, prints
+   `INFO,phone disconnected`, and advertises again so you can reconnect.
 
 ### Battery notes
 
-Running the WiFi AP adds roughly 100–150 mA on top of the reader, so budget
-around 0.5 A peak at high transmit power. Any modest power bank will run this
-for hours. Watch for banks that auto-shut-off under light load — the reader
-usually draws enough to keep them awake, but it's the most likely field
-annoyance.
+Bluetooth draws much less than the old WiFi hotspot; the reader dominates.
+Budget around 0.5 A peak at high transmit power. Watch for power banks that
+auto-shut-off under light load — the reader usually draws enough to keep them
+awake, but it's the most likely field annoyance.
 
 ## 6. How the "hotter/colder" metric works
 

@@ -17,11 +17,10 @@ struct DiskStore {
         .urls(for: .documentDirectory, in: .userDomainMask)[0]
         .appendingPathComponent("disks.json")
     
-    // 1. Mocked disk data
     static let mockData: [Disk] = [
-        Disk(name: "The Beast", type: "Driver", speed: 7, glide: 2, turn: 0, fade: 1),
-        Disk(name: "Leapord", type: "Mid", speed: 4, glide: 3, turn: 0, fade: 1),
-        Disk(name: "Kitten", type: "Approach", speed: 2, glide: 0, turn: 0, fade: 0)
+        Disk(name: "The Beast", type: "Distance Driver", speed: 7, glide: 2, turn: 0, fade: 1),
+        Disk(name: "Leapord", type: "Midrange", speed: 4, glide: 3, turn: 0, fade: 1),
+        Disk(name: "Kitten", type: "Putter", speed: 2, glide: 0, turn: 0, fade: 0)
     ]
 
     static func save(_ disks: [Disk]) {

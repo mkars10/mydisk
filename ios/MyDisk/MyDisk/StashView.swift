@@ -8,7 +8,7 @@ struct StashView: View {
         VStack(spacing: 16) {
             List {
                 HStack {
-                    Text("Disk Name").bold().frame(maxWidth: .infinity, alignment: .leading)
+                    Text("Name").bold().frame(maxWidth: .infinity, alignment: .leading)
                     Text("Type").bold().frame(maxWidth: .infinity, alignment: .leading)
                     Text("Flight Numbers").bold().frame(maxWidth: .infinity, alignment: .leading)
                 }

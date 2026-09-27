@@ -4,8 +4,8 @@ struct AddDiskView: View {
     @Environment(\.dismiss) var dismiss
         
     @State private var name: String = ""
-    @State private var type: String = "Driver"
-    let diskTypes = ["Driver", "Mid", "Approach"]
+    @State private var type: String = "Midrange"
+    let diskTypes = ["Putter", "Midrange", "Fairway Driver", "Distance Driver"]
     @State private var speed: Int = 0
     @State private var glide: Int = 0
     @State private var turn: Int = 0
@@ -17,28 +17,22 @@ struct AddDiskView: View {
         NavigationStack {
             Form {
                 Section(header: Text("Disk Details")) {
-                    // Text input field for Name
                     TextField("Name", text: $name)
                         .autocorrectionDisabled()
                     
-                    // Dropdown menu picker for Type
                     Picker("Type", selection: $type) {
                         ForEach(diskTypes, id: \.self) { type in
                             Text(type).tag(type)
                         }
                     }
                     
-                    TextField("Speed", value: $speed, format: .number)
-                        .keyboardType(.numberPad)
+                    Stepper("Speed: \(speed)", value: $speed, in: 1...14)
                     
-                    TextField("Glide", value: $glide, format: .number)
-                        .keyboardType(.numberPad)
+                    Stepper("Glide: \(glide)", value: $glide, in: 1...7)
                     
-                    TextField("Turn", value: $turn, format: .number)
-                        .keyboardType(.numberPad)
+                    Stepper("Turn: \(turn)", value: $turn, in: -5...1)
                     
-                    TextField("Fade", value: $fade, format: .number)
-                        .keyboardType(.numberPad)
+                    Stepper("Fade: \(fade)", value: $fade, in: 0...5)
                 }
             }
             .navigationTitle("Add New Disk")

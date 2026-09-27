@@ -105,39 +105,6 @@ struct MockSignalStrengthSource: SignalStrengthSource {
     }
 }
 
-struct StashView: View {
-    @State private var disks: [Disk] = []
-
-    var body: some View {
-        ScrollView {
-            Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 12) {
-                GridRow {
-                    Text("Name")
-                    Text("Type")
-                    Text("Flight Numbers")
-                }
-                .font(.headline)
-
-                Divider()
-
-                ForEach(disks) { disk in
-                    GridRow {
-                        Text(disk.name)
-                        Text(disk.type)
-                                                Text(disk.flightNumbers.map(String.init).joined(separator: ", "))
-                    }
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding()
-        }
-        .navigationTitle("Stash")
-        .onAppear {
-            disks = DiskStore.load()
-        }
-    }
-}
-
 struct SignalStrengthBar: View {
     let value: Double
 

@@ -42,3 +42,24 @@ possible without reflashing the ESP32).
 - Bluetooth adds some delay per read. Is it small enough that per-read beeps
   still feel instant?
 - Where should the maths live long term: ESP32, phone, or both?
+
+## Tune the proximity scaling from the app, without reflashing
+
+**Status:** parked for later (2026-09-26).
+
+**Why.** The numbers that turn signal strength and read rate into the 0-100
+proximity are guesses, fixed in the firmware (`firmware/DiscTracker/tracker.h`):
+`RSSI_FLOOR` (-80 dBm), `RSSI_CEIL` (-35 dBm), `RATE_CEIL` (20 reads/s),
+`STALE_MS` (2 s), `EWMA_ALPHA` (0.3), plus the 50/50 blend in `tracker.cpp`.
+Tuning them against real field numbers means a reflash for every change.
+
+**Ways to do it (pick when we get there):**
+
+- Keep the maths on the ESP32 and add a Bluetooth command or characteristic
+  to read and set the parameters, saved in the ESP32's flash so they survive a
+  reboot. Smaller change; the protocol gets a new message (version 2).
+- Move the maths to the phone. Needs raw reads over Bluetooth, so it overlaps
+  with the per-read beeping item above.
+
+**Touches:** firmware (`tracker`, `ble_link`), `docs/ble-interface.md`,
+MyDiskKit (a settings API), and a test control on the Finder Stats page.

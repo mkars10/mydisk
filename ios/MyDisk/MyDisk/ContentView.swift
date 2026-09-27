@@ -107,33 +107,69 @@ struct MockSignalStrengthSource: SignalStrengthSource {
 
 struct StashView: View {
     @State private var disks: [Disk] = []
+    @State private var isShowingAddForm = false
 
     var body: some View {
-        ScrollView {
-            Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 12) {
-                GridRow {
-                    Text("Name")
-                    Text("Type")
-                    Text("Flight Numbers")
+        VStack(spacing: 16) {
+            List {
+                // 1. Table Header Row (Simulated)
+                HStack {
+                    Text("Disk Name").bold().frame(maxWidth: .infinity, alignment: .leading)
+                    Text("Type").bold().frame(maxWidth: .infinity, alignment: .leading)
+                    Text("Flight Numbers").bold().frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .font(.headline)
-
-                Divider()
-
+                .listRowBackground(Color.clear) // Keeps the header flat
+                
+                // 2. Data Rows
                 ForEach(disks) { disk in
-                    GridRow {
-                        Text(disk.name)
-                        Text(disk.type)
-                                                Text(disk.flightNumbers.map(String.init).joined(separator: ", "))
+                    HStack {
+                        Text(disk.name).frame(maxWidth: .infinity, alignment: .leading)
+                        Text(disk.type).frame(maxWidth: .infinity, alignment: .leading)
+                        Text(disk.flightNumbers.map(String.init).joined(separator: ", ")).frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    // 3. Attach the native iOS swipe action
+                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                        Button(role: .destructive) {
+                            deleteDisk(disk)
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
                     }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding()
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding()
+            .toolbar {
+                Button {
+                    isShowingAddForm = true
+                } label: {
+                    Image(systemName: "plus")
+                }
+            }
+            .sheet(isPresented: $isShowingAddForm) {
+                AddDiskView { name, type in
+                    // This closure executes when the user clicks 'Save'
+                    let newDisk = Disk(name: name, type: type, flightNumbers: [])
+                    disks.append(newDisk)
+                    DiskStore.save(disks) // Persist the new disk
+                }
+            }
         }
         .navigationTitle("Stash")
         .onAppear {
             disks = DiskStore.load()
+        }
+    }
+    
+    private func deleteDisk(_ disk: Disk) {
+        // 1. Find the index of the specific disk using its unique ID
+        if let index = disks.firstIndex(where: { $0.id == disk.id }) {
+            
+            // 2. Remove it from the local @State array (this updates the UI instantly)
+            disks.remove(at: index)
+            
+            // 3. Save the newly updated array to disk using your store helper
+            DiskStore.save(disks)
         }
     }
 }
